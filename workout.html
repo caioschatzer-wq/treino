@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Meu Cronograma de Treino</title>
+    <style>
+        :root {
+            --bg: #0b0f19;
+            --surface: #141b2d;
+            --surface-light: #1e2740;
+            --surface-hover: #252f4d;
+            --text: #f0f4f8;
+            --text-muted: #8b9bb4;
+            --accent: #f59e0b;
+            --accent-light: #fbbf24;
+            --accent-glow: rgba(245, 158, 11, 0.2);
+            --success: #22c55e;
+            --success-bg: rgba(34, 197, 94, 0.1);
+            --purple: #a855f7;
+            --purple-bg: rgba(168, 85, 247, 0.1);
+            --blue: #3b82f6;
+            --blue-bg: rgba(59, 130, 246, 0.1);
+            --red: #ef4444;
+            --red-bg: rgba(239, 68, 68, 0.1);
+            --border: #1e2740;
+            --card-bg: #141b2d;
+            --shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            padding-bottom: 90px;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
+            padding: 28px 20px 20px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header h1 {
+            font-size: 1.35rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            background: linear-gradient(90deg, var(--accent-light), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 8px;
+            padding: 16px;
+            overflow-x: auto;
+            background: var(--bg);
+            position: sticky;
+            top: 84px;
+            z-index: 90;
+            border-bottom: 1px solid var(--border);
+            scrollbar-width: none;
+        }
+
+        .nav-tabs::-webkit-scrollbar { display: none; }
+
+        .tab-btn {
+            flex: 1;
+            min-width: 100px;
+            padding: 14px 16px;
+            border: 1.5px solid var(--border);
+            border-radius: 14px;
+            background: var(--surface);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+            text-align: center;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, var(--accent), #d97706);
+            border-color: var(--accent);
+            color: white;
+            box-shadow: 0 4px 20px rgba(245, 158, 11, 0.35);
+            transform: translateY(-1px);
+        }
+
+        .tab-btn:active { transform: scale(0.97); }
+
+        .workout-section {
+            display: none;
+            padding: 16px;
+            animation: fadeIn 0.35s ease;
+        }
+
+        .workout-section.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .workout-header { margin-bottom: 20px; padding: 0 4px; }
+
+        .workout-header h2 {
+            font-size: 1.25rem;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .workout-header .subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-style: italic;
+            line-height: 1.4;
+        }
+
+        .exercise-card {
+            background: var(--card-bg);
+            border: 1.5px solid var(--border);
+            border-radius: 18px;
+            margin-bottom: 14px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .exercise-card:active { transform: scale(0.99); }
+
+        .exercise-main {
+            padding: 18px 18px 14px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .exercise-main::after {
+            content: '▼';
+            position: absolute;
+            right: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            transition: transform 0.3s;
+        }
+
+        .exercise-card.expanded .exercise-main::after { transform: translateY(-50%) rotate(180deg); }
+
+        .exercise-header-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-right: 24px;
+        }
+
+        .exercise-number {
+            background: linear-gradient(135deg, var(--accent), #d97706);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 800;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+        }
+
+        .exercise-name {
+            flex: 1;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.3;
+        }
+
+        .exercise-details-row {
+            display: flex;
+            gap: 16px;
+            margin-left: 44px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+
+        .detail-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.8rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .pill-series {
+            background: var(--purple-bg);
+            color: var(--purple);
+        }
+
+        .pill-focus {
+            background: var(--blue-bg);
+            color: var(--blue);
+        }
+
+        .detail-tip {
+            margin: 12px 18px 14px;
+            padding: 12px 14px;
+            background: rgba(245, 158, 11, 0.08);
+            border-left: 3px solid var(--accent);
+            border-radius: 0 10px 10px 0;
+            font-size: 0.82rem;
+            color: var(--accent-light);
+            line-height: 1.45;
+        }
+
+        .alternatives-section {
+            display: none;
+            border-top: 1px solid var(--border);
+            padding: 14px 18px;
+            background: rgba(255,255,255,0.02);
+        }
+
+        .exercise-card.expanded .alternatives-section { display: block; animation: slideDown 0.25s ease; }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .alt-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .alt-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 12px 14px;
+            margin-bottom: 8px;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            background: var(--surface);
+            color: var(--text);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .alt-btn:active { transform: scale(0.98); }
+
+        .alt-btn:hover, .alt-btn:active {
+            border-color: var(--accent);
+            background: var(--surface-hover);
+        }
+
+        .alt-btn .swap-icon {
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .alt-btn.current {
+            border-color: var(--success);
+            background: var(--success-bg);
+            color: var(--success);
+        }
+
+        .alt-btn.current .swap-icon { opacity: 0.6; }
+
+        .superset-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .superset-note {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-style: italic;
+            margin-top: 6px;
+            padding: 8px 12px;
+            background: rgba(139, 92, 246, 0.08);
+            border-radius: 8px;
+            border-left: 2px solid var(--purple);
+        }
+
+        .cardio-card .exercise-number {
+            background: linear-gradient(135deg, var(--success), #16a34a);
+            box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
+        }
+
+        .tip-box {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(251, 191, 36, 0.03));
+            border: 1px solid rgba(251, 191, 36, 0.2);
+            border-radius: 16px;
+            padding: 18px;
+            margin: 20px 16px 30px;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .tip-icon { font-size: 1.4rem; flex-shrink: 0; }
+
+        .tip-text {
+            font-size: 0.88rem;
+            color: #fcd34d;
+            line-height: 1.55;
+        }
+
+        .progress-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .progress-track {
+            flex: 1;
+            height: 6px;
+            background: var(--surface-light);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--accent-light));
+            border-radius: 3px;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 0%;
+        }
+
+        .progress-text {
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: var(--accent-light);
+            min-width: 42px;
+            text-align: right;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: var(--surface-light);
+            color: var(--text);
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1px solid var(--border);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            z-index: 200;
+            white-space: nowrap;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        @media (max-width: 380px) {
+            .exercise-name { font-size: 0.9rem; }
+            .detail-pill { font-size: 0.75rem; }
+            .nav-tabs { padding: 12px; }
+            .tab-btn { min-width: 90px; padding: 12px 14px; font-size: 0.85rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>💪 Meu Cronograma de Treino</h1>
+        <p>Toque no exercício para ver alternativas</p>
+    </div>
+
+    <div class="nav-tabs">
+        <button class="tab-btn active" onclick="showTab('A')">Treino A<br><small style="opacity:0.7;font-weight:400">Segunda</small></button>
+        <button class="tab-btn" onclick="showTab('B')">Treino B<br><small style="opacity:0.7;font-weight:400">Quarta</small></button>
+        <button class="tab-btn" onclick="showTab('C')">Treino C<br><small style="opacity:0.7;font-weight:400">Sexta</small></button>
+    </div>
+
+    <!-- ========== TREINO A ========== -->
+    <div id="tab-A" class="workout-section active">
+        <div class="workout-header">
+            <h2>🏋️ Treino A — Segunda-Feira</h2>
+            <p class="subtitle">Foco: Peito, Costas (Largura), Bíceps Completo e Abdômen Reto</p>
+        </div>
+
+        <div class="exercise-card" data-exercise="A1" onclick="toggleExpand(this)">
+            <div class="exercise-main">
+                <div class="exercise-header-row">
+                    <div class="exercise-number">1</div>
+                    <div class="exercise-name" data-default="Supino Reto (Halter ou Barra)">Supino Reto (Halter ou Barra)</div>
+                </div>
+                <div class="exercise-details-row">
+                    <span class="detail-pill pill-series">4 x 8–10</span>
+                    <span class="detail-pill pill-focus">Peitoral total</span>
+                </div>
+            </div>
+            <div class="detail-tip">💡 Base do treino. Controle a descida, não deixe os cotovelos abrirem demais.</div>
+            <div class="alternatives-section">
+                <div class="alt-label">🔁 Alternativas — toque para trocar</div>
+                <button class="alt-btn current" onclick="event.stopPropagation(); swapExercise(this, 'Supino Reto (Halter ou Barra)', 'A1')">
+                    <span class="swap-icon">✓</span> Supino Reto (Halter ou Barra)
+                </button>
+                <button class="alt-btn" onclick="event.stopPropagation(); swapExercise(this, 'Supino Reto Máquina', 'A1')">
+                    <span class="swap-icon">⇄</span> Supino Reto Máquina
+                </button>
+                <button class="alt-btn" onclick="event.stopPropagation(); swapExercise(this, 'Flexão de braço c/ peso', 'A1')">
+                    <span class="swap-icon">⇄</span> Flexão de braço c/ peso
+                </button>
+            </div>
+        </div>
+
+        <div class="exercise-card" data-exercise="A2" onclick="toggleExpand(this)">
+            <div class="exercise-main">
+                <div class="exercise-header-row">
+                    <div class="exercise-number">2</div>
+                    <div class="exercise-name" data-default="Puxada Alta (Pulldown)">Puxada Alta (Pulldown)</div>
+                </div>
+                <div class="exercise-details-row">
+                    <span class="detail-pill pill-series">4 x 10</span>
+                    <span class="detail-pill pill-focus">Costas (Largura)</span>
+                </div>
+            </div>
+            <div class="detail-tip">💡 Puxe com os cotovelos, não com os braços. Contraia as costas no final.</div>
+            <div class="alternatives-section">
+                <div class="alt-label">🔁 Alternativas — toque para trocar</div>
+                <button class="alt-btn current" onclick="event.stopPropagation(); swapExercise(this, 'Puxada Alta (Pulldown)', 'A2')">
+                    <span class="swap-icon">✓</span> Puxada Alta (Pulldown)
+                </button>
+                <button class="alt-btn" onclick="event.stopPropagation(); swapExercise(this, 'Barra Fixa (Graviton)', 'A2')">
+                    <span class="swap-icon">⇄</span> Barra Fixa (Graviton)
+                </button>
+                <button class="alt-btn" onclick="event.stopPropagation(); swapExercise(this, 'Puxada com Triângulo', 'A2')">
+                    <span class="swap-icon">⇄</span> Puxada com Triângulo
+                </button>
+            </div>
+        </div>
+
+        <div class="exercise-card" data-exercise="A3" onclick="toggleExpand(this)">
+            <div class="exercise-main">
+                <div class="exercise-header-row">
+                    <div class="exercise-number">3</div>
+                    <div class="exercise-name" data-default="Bíceps Barra W">Bíceps Barra W</div>
+                </div>
+                <div class="exercise-details-row">
+                    <span class="detail-pill pill-series">4 x 10–12</span>
+                    <span class="detail-pill pill-focus">Miolo do bíceps</span>
+                </div>
+            </div>
+            <div class="detail-tip">💡 Não balance o corpo, isole o movimento. Squeeze no topo.</div>
+            <div class="alternatives-section">
+                <div class="alt-label">🔁 Alternativas — toque para trocar</div>
+                <button class="alt-btn current" onclick="event.stopPropagation(); swapExercise(this, 'Bíceps Barra W', 'A3')">
+                    <span class="swap-icon">✓</span> Bíceps Barra W
+                </button>
+                <button class="alt-btn" onclick="event.stopPropagation(); swapExercise(this, 'Bíceps no Banco Inclinado', 'A3')">
+                    <span class="swap-icon">⇄</span> Bíceps no Banco Inclinado
+                </button>
+                <button class="alt-btn" onclick="event.stopPropagation(); swapExercise(this, 'Bíceps Direto Barra Reta', 'A3')">
+                    <span class="swap-icon">⇄</span> Bíceps Direto Barra Reta
+                </button>
+            </div>
+        </div>
+
+        <div class="exercise-card" data-exercise="A4" onclick="toggleExpand(this)">
+            <div class="exercise-main">
+                <div class="exercise-header-row">
+                    <div class="exercise-number">4</div>
+                    <div class="exercise-name" data-default="Bíceps Rosca Martelo">Bíceps Rosca Martelo</div>
+                </div>
+                <div class="exercise-details-row">
+                    <span class="detail-pill pill-series">3 x 10–12</span>
+                    <span class="detail-pill pill-focus">Espessura do braço</span>
+                </div>
+            </div>
+            <div class="detail-tip">💡 Pegada neutra, suba até a altura do ombro. Não balance.</div>
+            <div class="alternatives-section">
+                <div class="alt-label">🔁 Alternativas — toque para trocar</div>
+                <button class="alt-btn current" onclick="event.stopPropagation(); swapExercise(this, 'Bíceps Rosca Martelo', 'A4')">
+                    <span class="swap-icon">✓</span> Bíceps Rosca Martelo
+                </button>
+                <button class="alt-btn" onclick="event.stopPropagation(); swapExercise(this, 'Martelo Alternado c/ Halter', 'A4')">
+                    <span class="swap-icon">⇄</span> Martelo Alternado c/ Halter
+                </button>
+                <button class="alt-btn" onclick="event.stopPropagation(); swapExercise(this, 'Rosca Martelo na Polia', 'A4')">
+                    <span class="swap-icon">⇄</span> Rosca Martelo na Polia
+                </button>
+            </div>
+        </div>
+
+        <div class="exercise-card" data-exercise="A5" onclick="toggleExpand(this)">
+            <div class="exercise-main">
+                <div class="exercise-header-row">
+                    <div class="exercise-number">5</div>
+                    <div class="exercise-name" data-default="Elevação Lateral (Halter)">Elevação Lateral (Halter)</div>
+                </div>
+                <div class="exercise-details-row">
+                    <span class="detail-pill pill-series">4 x 12–15</span>
+                    <span class="detail-pill pill-focus">Bônus Ombros</span>
+                </div>
+            </div>
+            <div class="detail-tip">💡 Levante até a altura do ombro, não balance. Cotovelos levemente flexionados.</div>
+            <div class="alternatives-section">
+                <div class="alt-label">🔁 Alternativas — toque para trocar</div>
+                <button class="alt-btn current" onclick="event.stopPropagation(); swapExercise(this, 'Elevação Lateral (Halter)', 'A5')">
+                    <span class="swap-icon">✓</span> Elevação Lateral (Halter)
+                </button>
+                <button class="alt-btn" onclick="event.stopPropagation(); swapExercise(this, 'Elevação Lateral na Polia', 'A5')">
+                    <span class="swap-icon">⇄</span> Elevação Lateral na Polia
+                </button>
+                <button class="alt-btn" onclick="event.stopPropagation(); swapExercise(this, 'Elevação Lateral Máquina', 'A5')">
+                    <span class="swap-icon">⇄</span> Elevação Lateral Máquina
+                </button>
+            </div>
+        </div>
+
+        <div class="exercise-card" data-exercise="A6" onclick="toggleExpand(this)">
+            <div class="exercise-main">
+                <div class="exercise-header-row">
+                    <div class="exercise-number">6</div>
+                    <div class="exercise-name" data-default="Abdominal Supra (Chão c/ peso)">Abdominal Supra (Chão c/ peso)</div>
+                </div>
+                <div class="exercise-details-row">
+                    <span class="detail-pill pill-series">4 x 15</span>
+                    <span class="detail-pill pill-focus">Core (Serrátil/Supra)</span>
+                </div>
+            </div>
+            <div class="detail-tip">💡 Não puxe a cabeça, use o abdômen para levantar o tronco.</div>
+            <div class="alternatives-section">
+                <div class="alt-label">🔁 Alternativas — toque para trocar</div>
+                <button class="alt-btn current" onclick="event.stopPropagation(); swapExercise(this, 'Abdominal Supra (Chão c/ peso)', 'A6')">
+                    <span class="swap-icon">✓</span> Abdominal Supra (Chão c/ peso)
+                </button>
+                <button class="alt-btn" onclick="event.stopPropagation(); swapExercise(this, 'Abdominal na Polia Alta', 'A6')">
+                    <span class="swap-icon">⇄</span> Abdominal na Polia Alta
+                </button>
+                <button class="alt-btn" onclick="event.stopPropagation(); swapExercise(this, 'Abdominal na Máquina', 'A6')">
+                    <span class="swap-icon">⇄</span> Abdominal na Máquina
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== TREINO B ========== -->
+    <div id="tab-B" class="workout-section">
+        <div class="workout-header">
+            <h2>🏋️ Treino B — Quarta-Feira</h2>
+            <p class="subtitle">Foco: Pernas Completo (Énfase em Glúteos), Tríceps e Oblíquos</p>
+        </div>
+
+        <div class="exercise-card" data-exercise="B1" onclick="toggleExpand(this)">
+            <div class="exercise-main">
+                <div class="exercise-header-row">
+                    <div class="exercise-number">1</div>
+                    <div class="exercise-name" data-default="Leg Press Articulado">Leg Press Articulado</div>
+                </div>
+                <div class="exercise-details-row">
+                    <span class="detail-pill pill-series">4 x 10–12</span>
+                    <span class="detail-pill pill-focus">Quadríceps e Glúteos</span>
+                </div>
+            </div>
+            <div class="detail-tip">💡 Foco em amplitude. Desça o máximo sem levantar o quadril do banco.</div>
+            <div class="alternatives-section">
+                <div class="alt-label">🔁 Alternativas — toque para trocar</div>
+                <button class="alt-btn current" onclick="event.stopPropagation(); swapExercise(this, 'Leg Press Articulado', 'B1')">
+                    <span class="swap-icon">✓</span> Leg Press Articulado
+                </button>
+                <button class="alt-btn" onclick="event.stopPropagation(); swapExercise(this, 'Agachamento Hack', 'B1')">
+                    <span class="swap-icon">⇄</span> Agachamento Hack
+                </button>
+                <button class="alt-btn" onclick="event.stopPropagation(); swapExercise(this, 'Agachamento Livre', 'B1')">
+                    <span class="swap-icon">⇄</span> Agachamento Livre
+                </button>
+            </div>
+        </div>
+
+        <div class="exercise-card" data-exercise="B2" onclick="toggleExpand(this)">
+            <div class="exercise-main">
+                <div class="exercise-header-row">
+                    <div class="exercise-number">2</div>
+                    <div class="exercise-name" data-default="Elevação Pélvica (Máq. ou Barra)">Elevação Pélvica (Máq. ou Barra)</div>
+                </div>
+                <div class="exercise-details-row">
+                    <span class="detail-pill pill-series">4 x 10–12</span>
+                    <span class="detail-pill pill-focus">Foco total em Glúteos</span>
+                </div>
+            </div>
+            <div class="detail-tip">💡 Contraia os glúteos no topo por 1 segundo. Não arqueie a lombar.</div>
+            <div class="alternatives-section">
+                <div class="alt-label">🔁 Alternativas — toque para trocar</div>
+                <button class="alt-btn current" onclick="event.stopPropagation(); swapExercise(this, 'Elevação Pélvica (Máq. ou Barra)', 'B2')">
+                    <span class="swap-icon">✓</span> Elevação Pélvica (Máq. ou Barra)
+                </button>
+                <button class="alt-btn" onclick="event.stopPropagation(); swapExercise(this, 'Stiff com Halteres', 'B2')">
+                    <span class="swap-icon">⇄</span> Stiff com Halteres
+                </button>
+                <button class="alt-btn" onclick="event.stopPropagation(); swapExercise(this, 'Cadeira Abdutora (45°)', 'B2')">
+                    <span class="swap-icon">⇄</span> Cadeira Abdutora (45°)
+                </button>
+            </div>
+        </div>
+
+        <div class="exercise-card" data-exercise="B3" onclick="toggleExpand(this)">
+            <div class="exercise-main">
+                <div class="exercise-header-row">
+                    <div class="exercise-number">3</div>
+                    <div class="exercise-name" data-default="Tríceps Pulley (Corda)">Tríceps Pulley (Corda)</div>
+                </div>
+                <div class="exercise-details-row">
+                    <span class="detail-pill pill-series">4 x 12</span>
+                    <span class="detail-pill pill-focus">Tríceps (Contração)</span>
+                </div>
+            </div>
+            <div class="detail-tip">💡 Abra as cordas no final do movimento para máxima contração.</div>
+            <div class="alternatives-section">
+                <div class="alt-label">🔁 Alternativas — toque para trocar</div>
+                <button class="alt-btn current" onclick="event.stopPropagation(); swapExercise(this, 'Tríceps Pulley (Corda)', 'B3')">
+                    <span class="swap-icon">✓</span> Tríceps Pulley (Corda)
+                </button>
+                <button class="alt-btn" onclick="event.stopPropagation(); swapExercise(this, 'Tríceps Pulley Barra Reta', 'B3')">
+                    <span class="swap-icon">⇄</span> Tríceps Pulley Barra Reta
+                </button>
+                <button class="alt-btn" onclick="event.stopPropagation(); swapExercise(this, 'Tríceps Coice na Polia', 'B3')">
+                    <span class="swap-icon">⇄</span> Tríceps Coice na Polia
+                </button>
+            </div>
+        </div>
+
+        <div class="exercise-card" data-exercise="B4" onclick="toggleExpand(this)">
+            <div class="exercise-main">
+                <div class="exercise-header-row">
+                    <div class="exercise-number">4</div>
+                    <div class="exercise-name" data-default="Tríceps Francês (Corda na Polia)">Tríceps Francês (Corda na Polia)</div>
+                </div>
+                <div class="exercise-details-row">
+                    <span class="detail-pill pill-series">4 x 10–12</span>
+                    <span class="detail-pill pill-focus">Tríceps (Alongamento)</span>
+                </div>
+            </div>
+            <div class="detail-tip">💡 Mantenha os cotovelos fixos. Alongue bem na descida.</div>
+            <div class="alternatives-section">
+                <div class="alt-label">🔁 Alternativas — toque para trocar</div>
+                <button class="alt-btn current" onclick="event.stopPropagation(); swapExercise(this, 'Tríceps Francês (Corda na Polia)', 'B4')">
+                    <span class="swap-icon">✓</span> Tríceps Francês (Corda na Polia)
+                </button>
+                <button class="alt-btn" onclick="event.stopPropagation(); swapExercise(this, 'Tríceps Testa (Barra W)', 'B4')">
+                    <span class="swap-icon">⇄</span> Tríceps Testa (Barra W)
+                </button>
+                <button class="alt-btn" onclick="event.stopPropagation(); swapExercise(this, 'Tríceps no Banco (Mergulho)', 'B4')">
+                    <span class="swap-icon">⇄</span> Tríceps no Banco (Mergulho)
+                </button>
+            </div>
+        </div>
+
+        <div class="exercise-card" data-exercise="B5" onclick="toggleExpand(this)">
+            <div class="exercise-main">
+                <div class="exercise-header-row">
+                    <div class="exercise-number">5</div>
+                    <div class="exercise-name" data-default="Cadeira Flexora">Cadeira Flexora</div>
+                </div>
+                <div class="exercise-details-row">
+                    <span class="detail-pill pill-series">3 x 12</span>
+                    <span class="detail-pill pill-focus">Posterior de coxa</span>
+                </div>
+            </div>
+            <div class="detail-tip">💡 Segure 1 segundo na contração máxima. Não deixe a carga bater no final.</div>
+            <div class="alternatives-section">
+                <div class="alt-label">🔁 Alternativas — toque para trocar</div>
+                <button class="alt-btn current" onclick="event.stopPropagation(); swapExercise(this, 'Cadeira Flexora', 'B5')">
+                    <span class="swap-icon">✓</span> Cadeira Flexora
+                </button>
+                <button class="alt-btn" onclick="event.stopPropagation(); swapExercise(this, 'Mesa Flexora', 'B5')">
+                    <span class="swap-icon">⇄</span> Mesa Flexora
+                </button>
+                <button class="alt-btn" onclick="event.stopPropagation(); swapExercise(this, 'Flexora Vertical', 'B5')">
+                    <span class="swap-icon">⇄</span> Flexora Vertical
+                </button>
+            </div>
+        </div>
+
+        <div class="exercise-card" data-exercise="B6" onclick="toggleExpand(this)">
+            <div class="exercise-main">
+                <div class="exercise-header-row">
+                    <div class="exercise-number">6</div>
+                    <div class="exercise-name" data-default="Abdominal Oblíquo Russo (c/ peso)">Abdominal Oblíquo Russo (c/ peso)</div>
+                </div>
+                <div class="exercise-details-row">
+                    <span class="detail-pill pill-series">4 x 20</span>
+                    <span class="detail-pill pill-focus">Foco em Oblíquos</span>
+                </div>
+            </div>
+            <div class="detail-tip">💡 10 cada lado. Gire o tronco, não apenas os braços. Controle o movimento.</div>
+            <div class="alternatives-section">
+                <div class="alt-label">🔁 Alternativas — toque para trocar</div>
+                <button class="alt-btn current" onclick="event.stopPropagation(); swapExercise(this, 'Abdominal Oblíquo Russo (c/ peso)', 'B6')">
+                    <span class="swap-icon">✓</span> Abdominal Oblíquo Russo (c/ peso)
+                </button>
+                <button class="alt-btn" onclick="event.stopPropagation(); swapExercise(this, 'Giro de Tronco na Polia', 'B6')">
+                    <span class="swap-icon">⇄</span> Giro de Tronco na Polia
+                </button>
+                <button class="alt-btn" onclick="event.stopPropagation(); swapExercise(this, 'Prancha Lateral Dinâmica', 'B6')">
+                    <span class="swap-icon">⇄</span> Prancha Lateral Dinâmica
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== TREINO C ========== -->
+    <div id="tab-C" class="workout-section">
+        <div class="workout-header">
+            <h2>🏋️ Treino C — Sexta-Feira</h2>
+            <p class="subtitle">Foco: Costas (Densidade), Ombros (Força), Braços Combinados e Oblíquos</p>
+        </div>
+
+        <div class="exercise-card" data-exercise="C1" onclick="toggleExpand(this)">
+            <div class="exercise-main">
+                <div class="exercise-header-row">
+                    <div class="exercise-number">1</div>
+                    <div class="exercise-name" data-default="Remada Baixa (Cabo ou Máquina)">Remada Baixa (Cabo ou Máquina)</div>
+                </div>
+                <div class="exercise-details-row">
+                    <span class="detail-pill pill-series">4 x 10</span>
+                    <span class="detail-pill pill-focus">Costas (Densidade/Meio)</span>
+                </div>
+            </div>
+            <div class="detail-tip">💡 Puxe em direção ao abdômen, contraia as escápulas no final.</div>
+            <div class="alternatives-section">
+                <div class="alt-label">🔁 Alternativas — toque para trocar</div>
+                <button class="alt-btn current" onclick="event.stopPropagation(); swapExercise(this, 'Remada Baixa (Cabo ou Máquina)', 'C1')">
+                    <span class="swap-icon">✓</span> Remada Baixa (Cabo ou Máquina)
+                </button>
+                <button class="alt-btn" onclick="event.stopPropagation(); swapExercise(this, 'Remada Cavalinho', 'C1')">
+                    <span class="swap-icon">⇄</span> Remada Cavalinho
+                </button>
+                <button class="alt-btn" onclick="event.stopPropagation(); swapExercise(this, 'Remada Unilateral (Serrote)', 'C1')">
+                    <span class="swap-icon">⇄</span> Remada Unilateral (Serrote)
+                </button>
+            </div>
+        </div>
+
+        <div class="exercise-card" data-exercise="C2" onclick="toggleExpand(this)">
+            <div class="exercise-main">
+                <div class="exercise-header-row">
+                    <div class="exercise-number">2</div>
+                    <div class="exercise-name" data-default="Desenvolvimento Ombros (Halter)">Desenvolvimento Ombros (Halter)</div>
+                </div>
+                <div class="exercise-details-row">
+                    <span class="detail-pill pill-series">4 x 8–10</span>
+                    <span class="detail-pill pill-focus">Ombros (Deltoide Anterior)</span>
+                </div>
+            </div>
+            <div class="detail-tip">💡 Suba até quase estender os braços, não trave os cotovelos no topo.</div>
+            <div class="alternatives-section">
+                <div class="alt-label">🔁 Alternativas — toque para trocar</div>
+                <button class="alt-btn current" onclick="event.stopPropagation(); swapExercise(this, 'Desenvolvimento Ombros (Halter)', 'C2')">
+                    <span class="swap-icon">✓</span> Desenvolvimento Ombros (Halter)
+                </button>
+                <button class="alt-btn" onclick="event.stopPropagation(); swapExercise(this, 'Desenvolvimento Máquina', 'C2')">
+                    <span class="swap-icon">⇄</span> Desenvolvimento Máquina
+                </button>
+                <button class="alt-btn" onclick="event.stopPropagation(); swapExercise(this, 'Desenvolvimento c/ Barra', 'C2')">
+                    <span class="swap-icon">⇄</span> Desenvolvimento c/ Barra
+                </button>
+            </div>
+        </div>
+
+        <div class="exercise-card" data-exercise="C3" onclick="toggleExpand(this)">
+            <div class="exercise-main">
+                <div class="exercise-header-row">
+                    <div class="exercise-number">3</div>
+                    <div class="exercise-name" data-default="Cadeira Extensora">Cadeira Extensora</div>
+                </div>
+                <div class="exercise-details-row">
+                    <span class="detail-pill pill-series">4 x 12</span>
+                    <span class="detail-pill pill-focus">Quadríceps isolado</span>
+                </div>
+            </div>
+            <div class="detail-tip">💡 Segure 1 segundo no topo de cada repetição. Não deixe a carga bater.</div>
+            <div class="alternatives-section">
+                <div class="alt-label">🔁 Alternativas — toque para trocar</div>
+                <button class="alt-btn current" onclick="event.stopPropagation(); swapExercise(this, 'Cadeira Extensora', 'C3')">
+                    <span class="swap-icon">✓</span> Cadeira Extensora
+                </button>
+                <button class="alt-btn" onclick="event.stopPropagation(); swapExercise(this, 'Afundo com Halteres', 'C3')">
+                    <span class="swap-icon">⇄</span> Afundo com Halteres
+                </button>
+                <button class="alt-btn" onclick="event.stopPropagation(); swapExercise(this, 'Passada (Walking Lunges)', 'C3')">
+                    <span class="swap-icon">⇄</span> Passada (Walking Lunges)
+                </button>
+            </div>
+        </div>
+
+        <div class="exercise-card" data-exercise="C4" onclick="toggleExpand(this)">
+            <div class="exercise-main">
+                <div class="exercise-header-row">
+                    <div class="exercise-number">4</div>
+                    <div class="exercise-name" data-default="Super-Série: Bíceps Scott + Tríceps Testa">Super-Série: Bíceps Scott + Tríceps Testa</div>
+                </div>
+                <div class="exercise-details-row">
+                    <span class="detail-pill pill-series">3 x 10–12 cada</span>
+                    <span class="detail-pill pill-focus">Pump absurdo de braço</span>
+                </div>
+            </div>
+            <div class="detail-tip">💡 Faça o Scott e vá direto para o Testa sem descansar. Descanse apenas após o término do Testa.</div>
+            <div class="alternatives-section">
+                <div class="alt-label">🔁 Alternativas da Super-Série — toque para trocar</div>
+                <div style="margin-bottom:8px;font-size:0.8rem;color:var(--text-muted)">Bíceps:</div>
+                <button class="alt-btn current" onclick="event.stopPropagation(); swapSupersetPart(this, 'Bíceps Scott (Máq. ou Banco)', 'biceps')">
+                    <span class="swap-icon">✓</span> Bíceps Scott (Máq. ou Banco)
+                </button>
+                <button class="alt-btn" onclick="event.stopPropagation(); swapSupersetPart(this, 'Bíceps Concentrado', 'biceps')">
+                    <span class="swap-icon">⇄</span> Bíceps Concentrado
+                </button>
+                <button class="alt-btn" onclick="event.stopPropagation(); swapSupersetPart(this, 'Bíceps na Polia Alta', 'biceps')">
+                    <span class="swap-icon">⇄</span> Bíceps na Polia Alta
+                </button>
+                <div style="margin:10px 0 8px;font-size:0.8rem;color:var(--text-muted)">Tríceps:</div>
+                <button class="alt-btn current" onclick="event.stopPropagation(); swapSupersetPart(this, 'Tríceps Testa (Barra W)', 'triceps')">
+                    <span class="swap-icon">✓</span> Tríceps Testa (Barra W)
+                </button>
+                <button class="alt-btn" onclick="event.stopPropagation(); swapSupersetPart(this, 'Tríceps Francês Halter', 'triceps')">
+                    <span class="swap-icon">⇄</span> Tríceps Francês Halter
+                </button>
+                <button class="alt-btn" onclick="event.stopPropagation(); swapSupersetPart(this, 'Tríceps Supinado (Barra)', 'triceps')">
+                    <span class="swap-icon">⇄</span> Tríceps Supinado (Barra)
+                </button>
+            </div>
+        </div>
+
+        <div class="exercise-card" data-exercise="C5" onclick="toggleExpand(this)">
+            <div class="exercise-main">
+                <div class="exercise-header-row">
+                    <div class="exercise-number">5</div>
+                    <div class="exercise-name" data-default="Crucifixo Invertido (Halter ou Peque Deck)">Crucifixo Invertido (Halter ou Peque Deck)</div>
+                </div>
+                <div class="exercise-details-row">
+                    <span class="detail-pill pill-series">3 x 12</span>
+                    <span class="detail-pill pill-focus">Ombro Posterior (Desenho)</span>
+                </div>
+            </div>
+            <div class="detail-tip">💡 Leve os braços para trás em arco, como se abraçasse uma árvore. Contraia o posterior.</div>
+            <div class="alternatives-section">
+                <div class="alt-label">🔁 Alternativas — toque para trocar</div>
+                <button class="alt-btn current" onclick="event.stopPropagation(); swapExercise(this, 'Crucifixo Invertido (Halter ou Peque Deck)', 'C5')">
+                    <span class="swap-icon">✓</span> Crucifixo Invertido (Halter ou Peque Deck)
+                </button>
+                <button class="alt-btn" onclick="event.stopPropagation(); swapExercise(this, 'Posterior de Ombro na Polia', 'C5')">
+                    <span class="swap-icon">⇄</span> Posterior de Ombro na Polia
+                </button>
+                <button class="alt-btn" onclick="event.stopPropagation(); swapExercise(this, 'Remada Aberta p/ Posterior', 'C5')">
+                    <span class="swap-icon">⇄</span> Remada Aberta p/ Posterior
+                </button>
+            </div>
+        </div>
+
+        <div class="exercise-card" data-exercise="C6" onclick="toggleExpand(this)">
+            <div class="exercise-main">
+                <div class="exercise-header-row">
+                    <div class="exercise-number">6</div>
+                    <div class="exercise-name" data-default="Prancha Lateral Isométrica">Prancha Lateral Isométrica</div>
+                </div>
+                <div class="exercise-details-row">
+                    <span class="detail-pill pill-series">3 x 45 seg</span>
+                    <span class="detail-pill pill-focus">Foco Estabilidade Oblíqua</span>
+                </div>
+            </div>
+            <div class="detail-tip">💡 45 seg cada lado. Mantenha o corpo alinhado, não deixe o quadril cair.</div>
+            <div class="alternatives-section">
+                <div class="alt-label">🔁 Alternativas — toque para trocar</div>
+                <button class="alt-btn current" onclick="event.stopPropagation(); swapExercise(this, 'Prancha Lateral Isométrica', 'C6')">
+                    <span class="swap-icon">✓</span> Prancha Lateral Isométrica
+                </button>
+                <button class="alt-btn" onclick="event.stopPropagation(); swapExercise(this, 'Abdominal Lateral no Chão', 'C6')">
+                    <span class="swap-icon">⇄</span> Abdominal Lateral no Chão
+                </button>
+                <button class="alt-btn" onclick="event.stopPropagation(); swapExercise(this, 'Inclinação Lateral c/ Halter', 'C6')">
+                    <span class="swap-icon">⇄</span> Inclinação Lateral c/ Halter
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="tip-box">
+        <span class="tip-icon">💡</span>
+        <span class="tip-text"><strong>Dica de ouro:</strong> Como são poucas séries por exercício, dê o seu máximo em cada uma delas (chegando perto da falha com boa postura).</span>
+    </div>
+
+    <div class="progress-bar">
+        <div class="progress-track">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-text" id="progressText">0%</div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // Track superset parts separately
+        let supersetState = { biceps: 'Bíceps Scott (Máq. ou Banco)', triceps: 'Tríceps Testa (Barra W)' };
+
+        function showTab(tab) {
+            document.querySelectorAll('.workout-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-' + tab).classList.add('active');
+            event.target.closest('.tab-btn').classList.add('active');
+            // Close all expanded cards when switching tabs
+            document.querySelectorAll('.exercise-card.expanded').forEach(c => c.classList.remove('expanded'));
+        }
+
+        function toggleExpand(card) {
+            // If already expanded, just collapse
+            if (card.classList.contains('expanded')) {
+                card.classList.remove('expanded');
+                return;
+            }
+            // Collapse others in same section
+            const section = card.closest('.workout-section');
+            section.querySelectorAll('.exercise-card.expanded').forEach(c => {
+                if (c !== card) c.classList.remove('expanded');
+            });
+            card.classList.add('expanded');
+        }
+
+        function swapExercise(btn, newName, exerciseId) {
+            const card = btn.closest('.exercise-card');
+            const nameEl = card.querySelector('.exercise-name');
+            const oldName = nameEl.textContent;
+
+            // Update name
+            nameEl.textContent = newName;
+
+            // Update current marker
+            card.querySelectorAll('.alt-btn').forEach(b => b.classList.remove('current'));
+            btn.classList.add('current');
+
+            // Show toast
+            showToast('✓ Trocado: ' + newName);
+
+            // Collapse after short delay
+            setTimeout(() => card.classList.remove('expanded'), 400);
+        }
+
+        function swapSupersetPart(btn, newName, part) {
+            supersetState[part] = newName;
+
+            // Update displayed name
+            const card = document.querySelector('[data-exercise="C4"]');
+            const nameEl = card.querySelector('.exercise-name');
+            nameEl.textContent = 'Super-Série: ' + supersetState.biceps + ' + ' + supersetState.triceps;
+
+            // Update current markers within this card only
+            const section = btn.closest('.alternatives-section');
+            const partLabel = part === 'biceps' ? 'Bíceps:' : 'Tríceps:';
+            let foundLabel = false;
+            section.querySelectorAll('.alt-btn').forEach(b => {
+                // Simple heuristic: check if this button's text contains the new name or is after the right label
+            });
+
+            // Better: just mark this one current, and unmark others in same group
+            // Find all buttons between this part's label and the next label
+            const allBtns = Array.from(section.querySelectorAll('.alt-btn'));
+            const thisIndex = allBtns.indexOf(btn);
+            let startIdx = 0, endIdx = allBtns.length;
+
+            if (part === 'biceps') {
+                endIdx = allBtns.findIndex((b, i) => i > thisIndex && b.textContent.includes('Tríceps'));
+                if (endIdx === -1) endIdx = allBtns.length;
+            } else {
+                startIdx = allBtns.findIndex((b, i) => i < thisIndex && b.textContent.includes('Tríceps'));
+                if (startIdx === -1) startIdx = 0;
+                // Actually for triceps, just find first triceps button
+                startIdx = allBtns.findIndex(b => b.textContent.includes('Tríceps'));
+                if (startIdx === -1) startIdx = 0;
+            }
+
+            for (let i = startIdx; i < endIdx; i++) {
+                allBtns[i].classList.remove('current');
+            }
+            btn.classList.add('current');
+
+            showToast('✓ ' + part.charAt(0).toUpperCase() + part.slice(1) + ' trocado: ' + newName);
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2200);
+        }
+
+        // Progress bar (based on expanded/viewed exercises as proxy for engagement)
+        function updateProgress() {
+            const activeSection = document.querySelector('.workout-section.active');
+            if (!activeSection) return;
+            const total = activeSection.querySelectorAll('.exercise-card').length;
+            const viewed = activeSection.querySelectorAll('.exercise-card.expanded').length;
+            const pct = total > 0 ? Math.round((viewed / total) * 100) : 0;
+            document.getElementById('progressFill').style.width = pct + '%';
+            document.getElementById('progressText').textContent = pct + '%';
+        }
+
+        // Update progress when cards expand/collapse
+        document.addEventListener('click', () => setTimeout(updateProgress, 350));
+        updateProgress();
+    </script>
+</body>
+</html>
